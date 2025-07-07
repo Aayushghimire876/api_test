@@ -1,40 +1,108 @@
 import 'dart:convert';
-import 'dart:math';
-
+import 'dart:developer';
 import 'package:api_test/model/todo_model.dart';
 import 'package:http/http.dart' as http;
 
 class TodoRepository {
-  static Future<List<TodoModel>?> get todoModelList => null;
+  static const header = {'Content-Type': 'application/json'};
 
-  static Future<List<TodoModel>?> fetchAlbum() async {
+  static Future<List<TodoModel>> fetchAlbum() async {
     final String url =
         'https://6866622d89803950dbb27925.mockapi.io/ap1/v1/GroceryItems';
 
-        try {
-          final response = await http.get(Uri.parse(url));
+    try {
+      final response = await http.get(Uri.parse(url));
 
-          if (response.statusCode == 200)  {
-            final dataList =jsonDecode(response.body) as List<dynamic>?;
+      if (response.statusCode == 200) {
+        final dataList = jsonDecode(response.body) as List<dynamic>?;
 
-            // final todoModelList =
-            //     dataList?.map((e) =>TodoModel fromJson((e)
+        final todoModelList =
+            dataList?.map((e) => TodoModel.fromJson(e)).toList() ?? [];
 
-            final todomodellist =dataList?.map((e) => TodoModel.fromJson((e)).to List() ?? []; 
+        return todoModelList;
+      }
 
-            var todoModelList2 = todoModelList;
-            for (var i in todoModelList2)  {
-              log(i.title);
-            }
+      return [];
+    } catch (e) {
+      log("Error ${e.toString()}");
+      return [];
+    }
+  }
 
-           log(response.statusCode.toString() as num);
+  static Future<void> postTodo(TodoModel todo) async {
+    final String url =
+        'https://6866622d89803950dbb27925.mockapi.io/ap1/v1/GroceryItems';
 
+    final data = {
+      "userId": todo.userId,
+      "title": todo.title,
+      "Completed": todo.completed,
+      "id": "122",
+    };
 
-           return todoModelList;
+    try {
+      final response = await http.post(
+        Uri.parse(url),
 
-          }
+        headers: header,
 
-          return [;
-        }catch (e) {
-          log("Error ${e.toString()}" as num);
-      
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        log(response.body);
+      }
+
+      log(response.body);
+      log(response.statusCode.toString());
+    } catch (e) {
+      log("Error ${e.toString()}");
+    }
+  }
+
+  static Future<void> editTodo(TodoModel todo) async {
+    final String url =
+        'https://6866622d89803950dbb27925.mockapi.io/ap1/v1/GroceryItems/${todo.id}';
+
+    final data = {
+      "userId": todo.userId,
+      "title": todo.title,
+      "Completed": todo.completed,
+      "id": todo.id,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+
+        headers: header,
+
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        log(response.body);
+      }
+
+      log(response.body);
+      log(response.statusCode.toString());
+    } catch (e) {
+      log("Error ${e.toString()}");
+    }
+  }
+
+  static Future<void> deleteTodo(String todoItemId) async {
+    final String url =
+        'https://6866622d89803950dbb27925.mockapi.io/ap1/v1/GroceryItems/$todoItemId';
+
+    try {
+      final response = await http.delete(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        log(response.body);
+      }
+    } catch (e) {
+      log("Error ${e.toString()}");
+    }
+  }
+}
